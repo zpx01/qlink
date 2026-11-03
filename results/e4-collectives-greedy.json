@@ -1,0 +1,301 @@
+{
+ "run": "E4: six qccl collectives on 4 merged Qwen3.5-2B models (one per GPU), greedy decoding with a per-token reference check, vs real NCCL on the same GPUs",
+ "ranks": [
+  {
+   "rank": 0,
+   "world": 4,
+   "backend": "model",
+   "mode": "greedy",
+   "check": true,
+   "stats": {
+    "all_reduce": {
+     "ticks": 81,
+     "seconds": 92.6,
+     "launches": 7,
+     "generated": 664,
+     "records": 80,
+     "sent_packets": 36,
+     "received_tokens": 90
+    },
+    "reduce_scatter": {
+     "ticks": 47,
+     "seconds": 48.9,
+     "launches": 4,
+     "generated": 342,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "all_gather": {
+     "ticks": 47,
+     "seconds": 56.0,
+     "launches": 4,
+     "generated": 378,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "broadcast": {
+     "ticks": 52,
+     "seconds": 80.9,
+     "launches": 2,
+     "generated": 163,
+     "records": 51,
+     "sent_packets": 2,
+     "received_tokens": 18
+    },
+    "reduce": {
+     "ticks": 52,
+     "seconds": 74.9,
+     "launches": 2,
+     "generated": 201,
+     "records": 33,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 35.8,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "forwards": 2003,
+   "positions": 7605,
+   "context_tokens": 7605
+  },
+  {
+   "rank": 1,
+   "world": 4,
+   "backend": "model",
+   "mode": "greedy",
+   "check": true,
+   "stats": {
+    "all_reduce": {
+     "ticks": 81,
+     "seconds": 92.6,
+     "launches": 7,
+     "generated": 664,
+     "records": 80,
+     "sent_packets": 36,
+     "received_tokens": 90
+    },
+    "reduce_scatter": {
+     "ticks": 47,
+     "seconds": 48.9,
+     "launches": 4,
+     "generated": 342,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "all_gather": {
+     "ticks": 47,
+     "seconds": 56.0,
+     "launches": 4,
+     "generated": 378,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "broadcast": {
+     "ticks": 52,
+     "seconds": 81.1,
+     "launches": 2,
+     "generated": 168,
+     "records": 24,
+     "sent_packets": 10,
+     "received_tokens": 3
+    },
+    "reduce": {
+     "ticks": 52,
+     "seconds": 74.7,
+     "launches": 2,
+     "generated": 211,
+     "records": 43,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 35.8,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "forwards": 2019,
+   "positions": 7640,
+   "context_tokens": 7640
+  },
+  {
+   "rank": 2,
+   "world": 4,
+   "backend": "model",
+   "mode": "greedy",
+   "check": true,
+   "stats": {
+    "all_reduce": {
+     "ticks": 81,
+     "seconds": 92.6,
+     "launches": 7,
+     "generated": 664,
+     "records": 80,
+     "sent_packets": 36,
+     "received_tokens": 90
+    },
+    "reduce_scatter": {
+     "ticks": 47,
+     "seconds": 48.9,
+     "launches": 4,
+     "generated": 342,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "all_gather": {
+     "ticks": 47,
+     "seconds": 56.0,
+     "launches": 4,
+     "generated": 378,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "broadcast": {
+     "ticks": 52,
+     "seconds": 81.1,
+     "launches": 2,
+     "generated": 225,
+     "records": 33,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 52,
+     "seconds": 74.5,
+     "launches": 2,
+     "generated": 163,
+     "records": 51,
+     "sent_packets": 2,
+     "received_tokens": 18
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 36.0,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "forwards": 2027,
+   "positions": 7609,
+   "context_tokens": 7609
+  },
+  {
+   "rank": 3,
+   "world": 4,
+   "backend": "model",
+   "mode": "greedy",
+   "check": true,
+   "stats": {
+    "all_reduce": {
+     "ticks": 81,
+     "seconds": 92.6,
+     "launches": 7,
+     "generated": 664,
+     "records": 80,
+     "sent_packets": 36,
+     "received_tokens": 90
+    },
+    "reduce_scatter": {
+     "ticks": 47,
+     "seconds": 48.9,
+     "launches": 4,
+     "generated": 342,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "all_gather": {
+     "ticks": 47,
+     "seconds": 56.0,
+     "launches": 4,
+     "generated": 378,
+     "records": 46,
+     "sent_packets": 18,
+     "received_tokens": 45
+    },
+    "broadcast": {
+     "ticks": 52,
+     "seconds": 81.1,
+     "launches": 2,
+     "generated": 235,
+     "records": 43,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 52,
+     "seconds": 74.7,
+     "launches": 2,
+     "generated": 168,
+     "records": 24,
+     "sent_packets": 10,
+     "received_tokens": 3
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 35.8,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "forwards": 2043,
+   "positions": 7652,
+   "context_tokens": 7652
+  }
+ ]
+}

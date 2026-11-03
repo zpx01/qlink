@@ -1,0 +1,456 @@
+<title>QLink for qwenGPU</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a hardware datasheet. One reading column, a status strip, spec tables, token lanes, plots. */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #14212b; --muted: #5a6773; --rule: #d3dae0; --grid: #e6eaee;
+  --accent: #0e6b63; --accent-soft: #dcefec; --packet: #a8500d; --packet-soft: #f7e6d7;
+  --good: #23743a; --warn: #9a6a00; --bad: #a23030;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1317; --surface: #151c22; --ink: #e2e8ed; --muted: #93a0ab; --rule: #27323a; --grid: #1f292f;
+  --accent: #4fb5a9; --accent-soft: #15302d; --packet: #efa15c; --packet-soft: #3a2614;
+  --good: #6cc785; --warn: #e0b54a; --bad: #ef7d7d;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e1317; --surface: #151c22; --ink: #e2e8ed; --muted: #93a0ab; --rule: #27323a; --grid: #1f292f;
+  --accent: #4fb5a9; --accent-soft: #15302d; --packet: #efa15c; --packet-soft: #3a2614;
+  --good: #6cc785; --warn: #e0b54a; --bad: #ef7d7d;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--body); }
+.wrap { max-width: 1000px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 24px; font-weight: 600; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; max-width: 70ch; }
+code, .mono { font-family: var(--mono); font-size: 0.88em; }
+a { color: var(--accent); }
+.eyebrow { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; color: var(--muted); font-weight: 600; }
+section { display: grid; gap: 14px; padding-block: 28px; border-top: 1px solid var(--rule); }
+header.top { display: grid; gap: 14px; padding-bottom: 24px; }
+.lede { font-size: 17px; max-width: 72ch; }
+.status { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); }
+.status b { color: var(--ink); font-weight: 600; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; font-family: var(--display); letter-spacing: 0.03em; white-space: nowrap; }
+.pill.ok { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+.pill.run { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.pill.todo { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.fact { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.fact .k { font-family: var(--display); font-size: 22px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.fact .v { font-size: 13px; color: var(--muted); }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.cols > * { min-width: 0; display: grid; gap: 10px; align-content: start; }
+@media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--display); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); white-space: nowrap; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.lanes { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; }
+.lane { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: start; }
+.lane .who { font-family: var(--display); font-weight: 600; font-size: 13px; padding-top: 3px; }
+.toks { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.t { font-family: var(--mono); font-size: 11.5px; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--rule); white-space: nowrap; color: var(--ink); background: var(--bg); }
+.t.own { border-color: color-mix(in srgb, var(--ink) 35%, transparent); }
+.t.sink { color: var(--packet); border-color: var(--packet); background: var(--packet-soft); }
+.t.peer { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 500; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--muted); align-items: center; }
+.sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.note { font-size: 13px; color: var(--muted); }
+pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; overflow-x: auto; margin: 0; }
+ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 74ch; }
+.diagram, .plot { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; overflow-x: auto; position: relative; }
+.diagram svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.diagram text { font-family: var(--body); fill: var(--ink); }
+.diagram .m { font-family: var(--mono); font-size: 11px; }
+.diagram .mu { fill: var(--muted); }
+.plots { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 760px) { .plots { grid-template-columns: 1fr; } }
+.plot { display: grid; gap: 6px; min-width: 0; }
+.plot h3 { font-size: 15px; }
+.plot .sub { font-size: 12.5px; color: var(--muted); }
+.plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.plot svg text { font-family: var(--body); font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.plot svg .lab { fill: var(--ink); font-weight: 600; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--rule); border-radius: 5px; padding: 6px 9px; font-size: 12.5px; box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 14%, transparent); white-space: nowrap; z-index: 2; }
+.tip b { font-variant-numeric: tabular-nums; }
+details { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 12px; }
+summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+summary:focus-visible, .hit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">qlink · lab notebook</div>
+  <h1>QLink: QwenGPUs that talk NCCL and train together</h1>
+  <p class="lede">qwenGPU compiles a 4-lane SIMT GPU into the weights of Qwen3.5-2B. This fork connects several of those models the way NVLink connects GPUs. When one model's weights write a store record, the record crosses into another model's context, where that model's own layers write it into its memory. NCCL's ring and multicast collectives run on top of that link, and so does a data-parallel training loop. Four merged Qwen3.5-2B models, one per GB200, trained a small neural network this way. The host launches kernels and routes packets by their address token. It never computes, reduces or decides a value.</p>
+  <div class="status">
+    <span>Updated <b id="updated">2026-11-02 11:40 UTC</b></span>
+    <span>Phase <b>D1, L1, M2 done, all exact · MNIST 86.9% · four QwenGPUs draw digits · blog v4: live WebGPU digit demo, phone layouts</b></span>
+    <span>Hardware <b>4 × GB200, NVLink (one node)</b></span>
+  </div>
+</header>
+
+<section>
+  <div class="eyebrow">Where it stands</div>
+  <div class="facts">
+    <div class="fact"><div class="k">98.8% test acc.</div><div class="v">A 2-8-1 MLP was trained data-parallel on 4 merged Qwen3.5-2B models for 40 steps, from 53.1% to 98.8% (100% at step 35). The replicas were bit-identical at every step and equal to an exact numpy replay.</div></div>
+    <div class="fact"><div class="k">6 / 6 = NCCL</div><div class="v">AllReduce, ReduceScatter, AllGather, Broadcast, Reduce and SendRecv on 4 models with pure greedy decoding. Every result matches real NCCL on the same GB200s, bit for bit.</div></div>
+    <div class="fact"><div class="k">Same CUDA</div><div class="v">The same <code>prim.cu</code> PTX and host schedule also run on the real GB200s with NVLink peer-to-peer stores. All 6 collectives are correct.</div></div>
+    <div class="fact"><div class="k">0 new weights</div><div class="v">The interconnect reuses the GPU's existing store record. No new tokens, no new layers, no retraining.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">The idea</div>
+  <h2>A store record is already a network packet</h2>
+  <div class="cols">
+    <div>
+      <p>In qwenGPU, global memory is the recurrent state of a Gated DeltaNet head: each 32-bit word is one row. The host writes memory with three tokens, <code>&lt;|gpu_mem a|&gt; &lt;|gpu=lo|&gt; &lt;|gpu=hi|&gt;</code>, and the model's memory head stores them in row <code>a</code>. A kernel's own <code>st.global</code> comes out of the model in exactly that form, as a write-back record after the warp's register values.</p>
+      <p>So a store made by one model can be fed straight into another model's context. The receiving model's layers absorb it as a memory write, exactly as they absorb the host's <code>cudaMemcpy</code>. That gives an interconnect with no new vocabulary and no new circuit.</p>
+    </div>
+    <div>
+      <p><b>Apertures.</b> Each device has a table of address ranges whose stores leave the device, like an NVLink peer mapping. When the model writes <code>MEM(a)</code> for an aperture address, the device sends the record to the peers and feeds <code>MEM(127)</code> locally, so the word goes to the sink. A multicast aperture keeps the local write too. Loads are never routed: an aperture address still reads local memory.</p>
+      <p><b>Record boundaries.</b> A packet is fed only between two records, after the model has predicted the next <code>EXEC</code> token and before that token goes in. There the packet only writes a memory row: the record counter is past every register-commit slot, and the next record reads memory at its <code>EXEC</code>. A kernel that polls a flag therefore sees a peer's store on its next loop iteration. The exact compiled circuit and the bf16 model both confirm this, token for token.</p>
+    </div>
+  </div>
+
+  <div class="diagram" role="img" aria-label="Two QwenGPUs connected by QLink: rank 0's store record goes to the fabric, which forwards it into rank 1's context where rank 1's memory head writes it.">
+    <svg viewBox="0 0 900 270" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--accent)"/></marker></defs>
+      <rect x="10" y="20" width="300" height="230" rx="6" fill="var(--bg)" stroke="var(--rule)"/>
+      <text x="26" y="46" font-weight="600" font-size="15">QwenGPU 0</text>
+      <text x="26" y="64" class="mu" font-size="12">merged Qwen3.5-2B · GB200 #0</text>
+      <rect x="26" y="80" width="268" height="56" rx="4" fill="var(--surface)" stroke="var(--rule)"/>
+      <text x="38" y="102" font-size="12.5">45 GPU layers (GDN + SwiGLU)</text>
+      <text x="38" y="122" class="mu" font-size="11.5">registers · ROM · memory rows</text>
+      <rect x="26" y="146" width="268" height="40" rx="4" fill="var(--surface)" stroke="var(--rule)"/>
+      <text x="38" y="171" font-size="12.5">24 Qwen layers (muted on chip tokens)</text>
+      <text x="26" y="214" class="m">st [sslot+i], v  →  MEM(0) lo hi</text>
+      <text x="26" y="234" class="m mu">local: MEM(127) lo hi (sink)</text>
+      <rect x="590" y="20" width="300" height="230" rx="6" fill="var(--bg)" stroke="var(--rule)"/>
+      <text x="606" y="46" font-weight="600" font-size="15">QwenGPU 1</text>
+      <text x="606" y="64" class="mu" font-size="12">merged Qwen3.5-2B · GB200 #1</text>
+      <rect x="606" y="80" width="268" height="56" rx="4" fill="var(--surface)" stroke="var(--rule)"/>
+      <text x="618" y="102" font-size="12.5">memory head writes row 0</text>
+      <text x="618" y="122" class="mu" font-size="11.5">its kernel's next ld sees the word</text>
+      <rect x="606" y="146" width="268" height="40" rx="4" fill="var(--surface)" stroke="var(--rule)"/>
+      <text x="618" y="171" font-size="12.5">spin: while (*tail &lt; wait) {}</text>
+      <text x="606" y="214" class="m">… VAL | MEM(0) lo hi | EXEC …</text>
+      <text x="606" y="234" class="m mu">fed at its next record boundary</text>
+      <rect x="350" y="92" width="200" height="86" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+      <text x="450" y="120" text-anchor="middle" font-weight="600" font-size="14">QLink fabric</text>
+      <text x="450" y="140" text-anchor="middle" font-size="11.5" class="mu">routes on the MEM header only</text>
+      <text x="450" y="158" text-anchor="middle" font-size="11.5" class="mu">payload tokens pass unread</text>
+      <line x1="300" y1="210" x2="350" y2="150" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah)"/>
+      <line x1="550" y1="150" x2="600" y2="210" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah)"/>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Real tokens</div>
+  <h2>One tick of the AllReduce, as both models wrote it</h2>
+  <p>Excerpt from the 2-rank run: rank 0 in the <code>recvReduceCopySend</code> step. Block 11's record carries four store write-backs to the next rank's FIFO slot. Rank 0's weights predict <code>gpu_mem 0..3</code>; its device feeds the sink header locally and forwards the records. Rank 1's context receives them at the same tick, with identical payload tokens. The same happens in the other direction.</p>
+  <div class="lanes" id="lanes"></div>
+  <div class="legend">
+    <span><span class="t own">gpu=e8b8</span> written by this model</span>
+    <span><span class="t sink">gpu_mem 127</span> store sent away (sink header fed locally)</span>
+    <span><span class="t peer">gpu_mem 0</span> arrived from the peer</span>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Training</div>
+  <h2>Four QwenGPUs train an MLP, data-parallel</h2>
+  <p>The task is XOR: label points in [−1, 1]² by the sign of x₀x₁. A linear model cannot solve it. The network is a 2-8-1 ReLU MLP with 32 parameters in Q8 fixed point (1.0 = 256), trained with mean-squared error. Each of the 4 ranks holds a replica of the parameters in its 127-word memory and a quarter of the 256 training points, and draws 8 samples per step (global batch 32). A step on each QwenGPU:</p>
+<pre>H2D        the rank's minibatch (its data loader), o = 0, loss = 0
+forward    mlp_forward   64 threads   o[s] += W2[k] · relu(W1[k]·x[s] + b1[k])   (atomicAdd)
+backward   mlp_backward  64 threads   per-sample gradients, atomicAdd into g; the loss
+comm       T1: ring AllReduce(g)      T2: ring ReduceScatter(g) + multicast shard update
+update     T1: sgd  p −= round(g / 2⁶)   T2: sgd_shard on this rank's 8 parameters</pre>
+  <p>Before step 0, rank 0 initializes the parameters and a collective (ring Broadcast in T1, a multicast copy in T2) gives every rank the same replica, as DDP does at construction. All arithmetic is int32, so the run has an exact numpy replay, and the QwenGPUs' parameters must equal it after every step on every rank. They do.</p>
+  <div class="plots">
+    <div class="plot" id="p-acc"><h3>Test accuracy</h3><div class="sub">256 held-out points, parameters read back from rank 0 after each step</div></div>
+    <div class="plot" id="p-loss"><h3>Training loss</h3><div class="sub">Σ(o − y)²/256 over the step's 32 samples, written by the backward kernels</div></div>
+  </div>
+  <div class="scroll"><table>
+    <thead><tr><th>Run</th><th>Ranks</th><th>Comm + update</th><th>Mode</th><th class="num">Steps</th><th class="num">Exact vs numpy</th><th class="num">Replicas identical</th><th class="num">Test acc.</th><th class="num">Tokens / rank / step</th><th class="num">Wall time</th></tr></thead>
+    <tbody>
+      <tr><td>T1</td><td>4 × model</td><td>ring AllReduce + replicated SGD</td><td>verify</td><td class="num">40</td><td class="num">40/40 on every rank</td><td class="num">every step</td><td class="num">53.1% → 98.8%</td><td class="num">10,228</td><td class="num">351 s</td></tr>
+      <tr id="t2row"><td>T2</td><td>4 × model</td><td>ZeRO-1: ReduceScatter + multicast shard update</td><td>verify</td><td class="num">40</td><td class="num">40/40 on every rank</td><td class="num">every step</td><td class="num">53.1% → 98.8%</td><td class="num">9,283</td><td class="num">255 s</td></tr>
+      <tr><td>G1</td><td>4 × model</td><td>as T1, first 2 steps</td><td>greedy + per-token check</td><td class="num">2</td><td class="num" colspan="5"><span class="pill run">running</span> about 50 min; must reproduce T1's first two steps</td></tr>
+    </tbody>
+  </table></div>
+  <div class="plot" id="p-tok"><h3>Where a training step's tokens go</h3><div class="sub">Tokens each model writes per step (EXEC, register VALs, store write-backs), per rank</div></div>
+  <details><summary>Per-step data (T1)</summary><div class="scroll" id="curve-table"></div></details>
+</section>
+
+<section>
+  <div class="eyebrow">Protocol</div>
+  <h2>qccl: NCCL's ring algorithms on one primitive kernel</h2>
+  <div class="cols">
+    <div>
+      <p>Each rank gets a ring channel at the same addresses on every rank, a symmetric heap as in NVSHMEM. The channel is a FIFO of S slots of C words, plus a <b>tail</b> word and a <b>head</b> word. Because apertures route only stores, the send side sits on the same addresses as the receive side. A kernel loads what the previous rank sent, and its stores to those addresses go to the next rank.</p>
+      <p>Flow control follows NCCL's Simple protocol. The sender waits for a free slot (<code>head</code>), writes the chunk into the receiver's slot, fences, and posts <code>tail</code>. The receiver waits for <code>tail</code>, consumes the slot, and posts <code>head</code> back. Ranks never wait on the host: each one's kernels spin on flags that peers' stores write.</p>
+      <p>Collectives are sequences of this kernel with different modes, in the order NCCL's <code>runRing</code> uses. AllReduce is <i>send, (N−2)× recvReduceSend, recvReduceCopySend, (N−2)× recvCopySend, recv</i>. SendRecv is software-pipelined like NCCL's grouped calls. Issuing every send before any receive deadlocks on a 2-slot FIFO, on QwenGPUs as with NCCL, and a test checks that it does.</p>
+    </div>
+    <div>
+<pre>// kernels/qccl/prim.cu (excerpt)
+if (mode &amp; RECV) while (*rtail &lt; rwait) {}
+if ((mode &amp; SEND) &amp;&amp; swait &gt; 0)
+  while (*rhead &lt; swait) {}
+int r = 0, v = 0;
+if (mode &amp; RECV)  r = rslot[i];
+if (mode &amp; LOCAL) v = x[i];
+if (!(mode &amp; SPLIT)) v += r;
+if (mode &amp; COPY)  y[i] = (mode &amp; SPLIT) ? r : v;
+if (mode &amp; SEND)  sslot[i] = v;   // -&gt; peer
+__threadfence_system(); __syncthreads();
+if (i != 0) return;
+if (mode &amp; SEND) *stail = spost;  // -&gt; next
+if (mode &amp; RECV) *shead = rpost;  // -&gt; prev</pre>
+    </div>
+  </div>
+  <h3>Driver changes that made this possible</h3>
+  <ul>
+    <li><b>Persistent device memory.</b> Pointer arguments can be fixed device addresses (<code>DevPtr</code>) instead of per-launch buffers, so parameters and FIFOs stay resident across launches.</li>
+    <li><b>Memory-order qualifiers.</b> <code>ld.volatile</code> and acquire/release accesses lower as plain accesses, and <code>membar</code>/<code>fence</code> are no-ops. On this machine one warp runs at a time and stores leave in program order over FIFO links, so the ordering already holds.</li>
+    <li><b>Uniform loads.</b> A load from a warp-uniform address is warp-uniform, so <code>while (*flag &lt; k)</code> compiles to a plain loop instead of forcing predication of the whole kernel.</li>
+    <li><b>Late early exit.</b> <code>if (threadIdx.x != 0) return;</code> after uniform loops is if-converted, so one thread can post a flag.</li>
+    <li><b>Records as a generator.</b> The reference interpreter now yields record by record: a record's EXEC token first (control flow only), then its body, computed from memory as it stands once peers' packets have landed.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="eyebrow">Optimizations</div>
+  <h2>Multicast, and what is cheap on a QwenGPU</h2>
+  <p>On a QwenGPU, a token the model writes costs a forward pass, while a token fed in (host records, peers' packets) is prefill and nearly free. So the cost of a collective is the tokens each rank must write. A ring moves every word through every rank. A multicast window (an aperture whose stores land locally and at every peer, like NVLink SHARP's <code>multimem.st</code> on GB200's NVLink switch) lets each word be written once. That is the model behind the NVLS-style collectives and the ZeRO-1 training step.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Collective</th><th>Ranks</th><th class="num">Words</th><th class="num">Ring: tokens / records</th><th class="num">Multicast: tokens / records</th><th class="num">Saving</th></tr></thead>
+    <tbody>
+      <tr><td>AllGather</td><td>2</td><td class="num">16</td><td class="num">322 / 42</td><td class="num">169 / 17</td><td class="num">−48%</td></tr>
+      <tr><td>AllGather</td><td>4</td><td class="num">32</td><td class="num">752 / 88</td><td class="num">209 / 25</td><td class="num">−72%</td></tr>
+      <tr><td>AllReduce (two-shot: ring RS + multicast AG)</td><td>2</td><td class="num">16</td><td class="num">512 / 64</td><td class="num">467 / 59</td><td class="num">−9%</td></tr>
+      <tr><td>AllReduce (two-shot: ring RS + multicast AG)</td><td>4</td><td class="num">32</td><td class="num">1,328 / 160</td><td class="num">889 / 113</td><td class="num">−33%</td></tr>
+      <tr><td>Training comm + update (T1 → T2)</td><td>4</td><td class="num">32</td><td class="num">1,892 / –</td><td class="num">947 / –</td><td class="num">−50%</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Model-written tokens and records per rank, measured on the reference (identical to the models'). The saving grows with the number of ranks, since the ring's per-rank traffic is about 2(N−1)/N of the buffer while multicast writes each word once. Multicast here is pure replication by the fabric. In-network reduction (SHARP's <code>multimem.ld_reduce</code>) would make the fabric add numbers, which the host never does in this design, so reductions stay in the GPUs' weights.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Verification</div>
+  <h2>Every token is checked, at three levels and in three modes</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Level</th><th>What computes the tokens</th><th>Checked against</th></tr></thead>
+    <tbody>
+      <tr><td>Reference</td><td>Record-by-record interpreter of the machine blocks</td><td>numpy (int32, wrapping) and real NCCL</td></tr>
+      <tr><td>Exact circuit</td><td>The compiled GPU layers, evaluated in float64 (chipformer IR)</td><td>Reference token streams, token for token</td></tr>
+      <tr><td>Model</td><td>Merged Qwen3.5-2B, bf16, one GB200 per rank</td><td>Reference token streams, token for token, and numpy / NCCL results</td></tr>
+    </tbody>
+  </table></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Mode</th><th>How the model is run</th><th class="num">2-rank AllReduce</th></tr></thead>
+    <tbody>
+      <tr><td>greedy</td><td>Autoregressive: one forward pass per token, every prediction fed back; with <code>--check</code> a reference shadow compares each token as it is written. About 7 tokens/s per rank.</td><td class="num">46 s</td></tr>
+      <tr><td>draft</td><td>The reference drafts a record; the model runs it in one pass and must agree at every token before the next tick (speculative decoding with an exact drafter).</td><td class="num">–</td></tr>
+      <tr><td>verify</td><td>The reference drives the lockstep system, with real packet exchange between processes. At the end of each launch the model runs the exact context it would have seen in one pass, and its argmax at every position it owns must equal the token there.</td><td class="num">2.2 s</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Why verify mode proves the greedy result. If every model's argmax equals the reference token at every position it owns, given the reference prefix, then by induction over ticks the greedy system writes exactly the reference streams: each model's first deviation would have to be at a checked position. This is the same teacher-forced check upstream qwenGPU uses in <code>merged_check</code>. T1 checked about 410,000 owned positions per rank. Greedy runs (E3, E4, G1) show the literal autoregressive system producing identical streams.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Experiments</div>
+  <h2>Run log</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>ID</th><th>Run</th><th>Backend</th><th>Result</th><th class="num">Tokens/rank</th><th class="num">Time</th></tr></thead>
+    <tbody>
+      <tr><td>E0</td><td>Upstream single-GPU check (vadd, reduce)</td><td>model, 1 GB200</td><td><span class="pill ok">exact</span> text KL 5.4e-4; 864/864 reduce tokens identical</td><td class="num">864</td><td class="num">110 s</td></tr>
+      <tr><td>E1</td><td>Ring AllReduce, N = 2, 3, 4; n up to 64</td><td>reference</td><td><span class="pill ok">= numpy</span> all sizes; plus RS, AG, Bcast, Reduce, SendRecv, flow control (22 tests)</td><td class="num">232–1,328</td><td class="num">&lt;1 s</td></tr>
+      <tr><td>E2</td><td>Ring AllReduce, N = 2, n = 8</td><td>exact circuit</td><td><span class="pill ok">identical</span> 1,020/1,020 tokens per rank; = numpy</td><td class="num">232</td><td class="num">84 s</td></tr>
+      <tr><td>E3</td><td>Ring AllReduce, N = 2, n = 8, greedy</td><td>model, 2 GB200</td><td><span class="pill ok">identical</span> 1,020/1,020 tokens per rank; = numpy</td><td class="num">232</td><td class="num">46 s</td></tr>
+      <tr><td>E4</td><td>6 collectives, N = 4, greedy, one process per GPU (torchrun)</td><td>model, 4 GB200</td><td><span class="pill ok">= NCCL</span> 6/6 bit-identical to real NCCL; ~7,600-token streams identical to the reference system</td><td class="num">~2,000</td><td class="num">389 s</td></tr>
+      <tr><td>E5</td><td>The same 6 collectives: same <code>prim.cu</code> PTX on the real GPUs, NVLink P2P stores</td><td>4 GB200 (CUDA)</td><td><span class="pill ok">correct</span> 6/6, 88 async launches, synchronized only by device flags</td><td class="num">–</td><td class="num">47 ms</td></tr>
+      <tr><td>E6</td><td>2-rank AllReduce, verify mode</td><td>model, circuit</td><td><span class="pill ok">identical</span> streams equal greedy's; 256/256 owned positions per rank</td><td class="num">232</td><td class="num">2.2 s</td></tr>
+      <tr><td>T1</td><td>Data-parallel MLP, ring AllReduce, 40 steps</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> 40/40 steps = numpy on all ranks; 98.8% test acc.</td><td class="num">10,228 / step</td><td class="num">351 s</td></tr>
+      <tr id="t2log"><td>T2</td><td>Data-parallel MLP, ZeRO-1 over multicast, 40 steps</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> 40/40 = numpy on all ranks; parameters, loss and accuracy identical to T1 at every step</td><td class="num">9,283 / step</td><td class="num">255 s</td></tr>
+      <tr><td>G1</td><td>T1's first 2 steps, pure greedy, per-token check</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> 2/2 steps = numpy on every rank; identical to T1; one forward pass per token (~21k per rank)</td><td class="num">10,228 / step</td><td class="num">3,460 s</td></tr>
+      <tr><td>T1-CUDA</td><td>T1's program (same PTX, same schedule) on the 4 real GB200s, NVLink P2P</td><td>4 GB200 (CUDA)</td><td><span class="pill ok">exact</span> 40/40 steps = numpy; final parameters identical to T1</td><td class="num">–</td><td class="num">68 ms</td></tr>
+      <tr><td>T1-fla</td><td>T1 with flash-linear-attention's Gated DeltaNet kernels in the models</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> 40/40 steps; ~410k positions checked per rank</td><td class="num">10,228 / step</td><td class="num">75 s</td></tr>
+      <tr><td>E7</td><td>6 collectives on 8 QwenGPUs: two merged models per GB200, verify mode</td><td>model, 4 GB200</td><td><span class="pill ok">= numpy</span> 6/6 on all 8 ranks; every ~7,200-token stream identical to the reference system (NCCL cannot run two ranks per GPU, so numpy is the check)</td><td class="num">1,480 (AllReduce)</td><td class="num">–</td></tr>
+      <tr><td>E8</td><td>Multicast AllGather, NVLS AllReduce and a mid-run context rebase, 2 ranks</td><td>exact circuit</td><td><span class="pill ok">identical</span> results correct; both 1,374-token streams equal the reference</td><td class="num">–</td><td class="num">17 s</td></tr>
+      <tr><td>M1</td><td>MNIST, 5×5 crops, linear classifier, tensor-parallel over 4 QwenGPUs, 3,000 images</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> 80.6% test accuracy (the model's least-squares ceiling is 80.9%); weights equal the numpy replay at 30/30 checkpoints; ~8.5M positions checked per rank, 65 context rebases</td><td class="num">2,830 / image</td><td class="num">3,306 s</td></tr>
+      <tr><td>D1</td><td>DDPM drawing a “7”: 3→32→2 denoiser, tensor-parallel over 4 QwenGPUs, 6,000 steps, sampling on device</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> parameters equal the numpy replay at 12/12 checkpoints; all 256 generated points equal the replay at every one of the 20 DDIM steps, on every rank; ~40M tokens per rank, all checked; ~260 context rebases per rank</td><td class="num">6,248 / step</td><td class="num">6,928 s</td></tr>
+      <tr id="l1row"><td>L1</td><td>Latent image diffusion on MNIST: fixed PCA-8 encoder, 9→16→8 denoiser tensor-parallel over 4 QwenGPUs (bias updates folded in as extra weight rows), 6,000 steps, 64 digits sampled on device; host-trained MLP decoder (8→128→784) draws them</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> parameters equal the numpy replay at 6/6 checkpoints; all 64 generated digits equal the replay at every one of the 20 DDIM steps, on every rank; ~25.9M tokens per rank, all checked; 201 context rebases. Seed chosen by scoring numpy replays (the replay predicts the run exactly); with the MLP decoder 76% of samples are confidently classified by an MNIST MLP (53% with the linear PCA decoder). The blog's WebGPU demo reproduces all 64 digits bit for bit</td><td class="num">3,989 / step</td><td class="num">5,309 s</td></tr>
+      <tr id="m2row"><td>M2</td><td>MNIST again, same 4 QwenGPUs and 80 words each: inputs are 31 whitened principal components (the data loader's fixed encoder) and the update is a one-vs-rest squared hinge (<code>tp_hinge</code>), 6,000 images</td><td>model, 4 GB200</td><td><span class="pill ok">exact</span> 86.9% test accuracy (M1: 80.6%); weights equal the numpy replay at 60/60 checkpoints. 100% is out of reach for any model (published best ≈ 99.8%); 63 components would give ≈ 90% in numpy but need 8 ranks, which do not fit (see limits)</td><td class="num">3,065 / image</td><td class="num">3,802 s</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="eyebrow">Limits</div>
+  <h2>What this machine cannot do (yet)</h2>
+  <ul>
+    <li>QLink carries stores only. Remote loads (P2P reads) and remote atomics would need the peer to compute a reply. Collectives therefore push data, as NCCL's Simple and LL protocols do, and an atomic into an aperture is refused.</li>
+    <li>Memory is 127 words per GPU. The T2 layout uses 119 of them: channel 18, parameters 32 (a multicast window), gradients 32, batch 32, flags 4, loss 1.</li>
+    <li>Memory also caps tensor parallelism. A ring AllReduce moves one 4-word chunk per rank per step (4 lanes), so the MNIST logits buffer must grow to 4N words, and the channel needs two FIFO slots: with one, every rank waits for its successor's free-slot flag, which is posted only at the end of that rank's own receive-and-send launch, so the ring deadlocks (a reference test caught it). At 8 ranks MNIST would need 80 + 8 + 32 + 1 + 10 = 131 of 127 words, so M2 stays at 4.</li>
+    <li>Ranks advance in lockstep, one record per tick. Real GPUs are asynchronous; lockstep keeps every run deterministic and replayable on the reference. The protocol itself does not depend on it: E5 runs it on real, asynchronous GPUs.</li>
+    <li>Greedy decoding runs about 7 tokens/s per model on GB200, where 15 ms of GPU work per token sits under about 150 ms of host overhead (6,000 kernel launches). CUDA graphs would close most of that gap; verify mode sidesteps it.</li>
+    <li>Speedups that keep every check: flash-linear-attention's Gated DeltaNet kernels (a 1,024-token pass drops from 442 to 179 ms; T1 stays exact at all ~410k checked positions), a ROM diff (a launch only re-sends the program rows it changes), a CPU fabric for the per-tick exchange (it never waits behind model work on the GPU), and burst exchange (several records per collective; still deterministic). Long runs also rebase a context: read the 127 words back, start fresh, write them in again.</li>
+    <li>One upstream test (<code>test_cuda::test_run[SHARED]</code>) fails with clang 18 on the pristine upstream checkout as well (clang emits PTX the driver does not lower). It is not affected by this work.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="eyebrow">Code</div>
+  <p>Repository: <a href="https://github.com/zpx01/qlink">github.com/zpx01/qlink</a>. It starts from <a href="https://github.com/vixhal-baraiya/qwenGPU">qwenGPU</a> (vixhal-baraiya, MIT), whose transformer compiler is <a href="https://github.com/divagr18/qwenputer">Qwenputer</a> (Divyansh Agrawal, MIT); the README credits both and gives Qwenputer's citation. <code>qgpu/dist/</code> holds the device, backends, transport, qccl, training and real-GPU backend; kernels are in <code>kernels/qccl/</code> and <code>kernels/train/</code>; runners are <code>scripts/qlink_run.py</code>, <code>scripts/train_dp.py</code> and <code>scripts/train_cuda.py</code>; tests are in <code>tests/test_dist.py</code>; driver changes are in <code>qgpu/lower.py</code>.</p>
+</section>
+</div>
+
+<script>
+// ---- token lanes: rank 0 and rank 1, one tick of the 2-rank AllReduce (reference = model)
+const T = {
+  r0: [["gpu_exec 11 0",1],["gpu_mem 127",1,"s"],["gpu=e8b8",1],["gpu=cecd",1],["gpu_mem 127",1,"s"],["gpu=3da9",1],["gpu=8a7d",1],["gpu_mem 127",1,"s"],["gpu=f01d",1],["gpu=9342",1],["gpu_mem 127",1,"s"],["gpu=27b6",1],["gpu=843b",1],["gpu_mem 0",2],["gpu=513b",2],["gpu=acde",2],["gpu_mem 1",2],["gpu=7a78",2],["gpu=5032",2],["gpu_mem 2",2],["gpu=1c4e",2],["gpu=2640",2],["gpu_mem 3",2],["gpu=5979",2],["gpu=69aa",2]],
+  r1: [["gpu_exec 11 0",1],["gpu_mem 127",1,"s"],["gpu=513b",1],["gpu=acde",1],["gpu_mem 127",1,"s"],["gpu=7a78",1],["gpu=5032",1],["gpu_mem 127",1,"s"],["gpu=1c4e",1],["gpu=2640",1],["gpu_mem 127",1,"s"],["gpu=5979",1],["gpu=69aa",1],["gpu_mem 0",2],["gpu=e8b8",2],["gpu=cecd",2],["gpu_mem 1",2],["gpu=3da9",2],["gpu=8a7d",2],["gpu_mem 2",2],["gpu=f01d",2],["gpu=9342",2],["gpu_mem 3",2],["gpu=27b6",2],["gpu=843b",2]]
+};
+const lanes = document.getElementById("lanes");
+for (const [k, label] of [["r0", "rank 0"], ["r1", "rank 1"]]) {
+  const row = document.createElement("div"); row.className = "lane";
+  const who = document.createElement("div"); who.className = "who"; who.textContent = label;
+  const toks = document.createElement("div"); toks.className = "toks";
+  for (const [name, src, s] of T[k]) {
+    const el = document.createElement("span");
+    el.className = "t " + (s ? "sink" : src === 2 ? "peer" : "own");
+    el.textContent = name; toks.appendChild(el);
+  }
+  row.append(who, toks); lanes.appendChild(row);
+}
+
+// ---- T1 training curve (x = updates applied; accuracy at x = 0 is the initial replica)
+const ACC = [0.531,0.68,0.758,0.77,0.754,0.766,0.773,0.773,0.777,0.781,0.773,0.781,0.781,0.781,0.781,0.781,0.914,0.918,0.922,0.93,0.926,0.926,0.926,0.93,0.949,0.957,0.957,0.941,0.957,0.973,0.98,0.98,0.988,0.988,0.992,0.992,1.0,0.988,0.992,0.992,0.988];
+const LOSS = [8733,4655,5525,5276,3978,4270,3585,5042,4423,5458,4483,3392,3072,3891,3257,4829,3228,3669,4236,3291,3822,3447,3907,3840,2822,2247,2600,3524,2812,3386,2890,2573,2589,2569,3037,2655,2008,2670,1712,1869];
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, attrs = {}) { const t = el("text", { x, y, ...attrs }, parent); t.textContent = s; return t; }
+
+function lineChart(host, xs, ys, { yMin, yMax, yTicks, fmt, xLabel, tipLabel, endLabel }) {
+  const W = 460, H = 230, L = 46, R = 54, Tp = 12, B = 34;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": host.querySelector("h3").textContent }, host);
+  const sx = x => L + (x - xs[0]) / (xs[xs.length - 1] - xs[0]) * (W - L - R);
+  const sy = y => Tp + (1 - (y - yMin) / (yMax - yMin)) * (H - Tp - B);
+  for (const t of yTicks) {
+    el("line", { x1: L, x2: W - R, y1: sy(t), y2: sy(t), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+    txt(svg, L - 6, sy(t) + 4, fmt(t), { "text-anchor": "end" });
+  }
+  for (const t of [0, 10, 20, 30, 40].filter(v => v >= xs[0] && v <= xs[xs.length - 1]))
+    txt(svg, sx(t), H - B + 16, String(t), { "text-anchor": "middle" });
+  txt(svg, (L + W - R) / 2, H - 4, xLabel, { "text-anchor": "middle" });
+  el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: "var(--rule)" }, svg);
+  const d = xs.map((x, i) => `${i ? "L" : "M"}${sx(x).toFixed(1)},${sy(ys[i]).toFixed(1)}`).join("");
+  el("path", { d, fill: "none", stroke: "var(--accent)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+  const lx = xs[xs.length - 1], ly = ys[ys.length - 1];
+  el("circle", { cx: sx(lx), cy: sy(ly), r: 4, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2 }, svg);
+  txt(svg, sx(lx) + 8, sy(ly) + 4, endLabel(ly), { class: "lab" });
+  // crosshair + tooltip
+  const hair = el("line", { y1: Tp, y2: H - B, stroke: "var(--muted)", "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
+  const dot = el("circle", { r: 4, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" }, svg);
+  const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.appendChild(tip);
+  const hit = el("rect", { x: L, y: Tp, width: W - L - R, height: H - Tp - B, fill: "transparent", tabindex: 0, class: "hit" }, svg);
+  let cur = xs.length - 1;
+  function show(i) {
+    cur = Math.max(0, Math.min(xs.length - 1, i));
+    const x = sx(xs[cur]), y = sy(ys[cur]);
+    hair.setAttribute("x1", x); hair.setAttribute("x2", x); hair.setAttribute("visibility", "visible");
+    dot.setAttribute("cx", x); dot.setAttribute("cy", y); dot.setAttribute("visibility", "visible");
+    tip.replaceChildren();
+    const b = document.createElement("b"); b.textContent = fmt(ys[cur], true);
+    tip.append(b, document.createTextNode(` ${tipLabel} · step ${xs[cur]}`));
+    tip.hidden = false;
+    const box = svg.getBoundingClientRect(), hb = host.getBoundingClientRect(), scale = box.width / W;
+    let left = box.left - hb.left + x * scale + 10;
+    if (left + tip.offsetWidth > hb.width - 8) left -= tip.offsetWidth + 20;
+    tip.style.left = left + "px"; tip.style.top = (box.top - hb.top + y * scale - 34) + "px";
+  }
+  function hide() { hair.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); tip.hidden = true; }
+  hit.addEventListener("pointermove", e => {
+    const box = svg.getBoundingClientRect(), px = (e.clientX - box.left) * W / box.width;
+    let best = 0; xs.forEach((x, i) => { if (Math.abs(sx(x) - px) < Math.abs(sx(xs[best]) - px)) best = i; });
+    show(best);
+  });
+  hit.addEventListener("pointerleave", hide);
+  hit.addEventListener("focus", () => show(cur));
+  hit.addEventListener("blur", hide);
+  hit.addEventListener("keydown", e => { if (e.key === "ArrowRight") show(cur + 1); if (e.key === "ArrowLeft") show(cur - 1); });
+}
+lineChart(document.getElementById("p-acc"), ACC.map((_, i) => i), ACC,
+  { yMin: 0.5, yMax: 1.0, yTicks: [0.5, 0.6, 0.7, 0.8, 0.9, 1.0], fmt: (v, t) => (v * 100).toFixed(t ? 1 : 0) + "%",
+    xLabel: "SGD steps applied", tipLabel: "test accuracy", endLabel: v => (v * 100).toFixed(1) + "%" });
+lineChart(document.getElementById("p-loss"), LOSS.map((_, i) => i), LOSS,
+  { yMin: 0, yMax: 9000, yTicks: [0, 3000, 6000, 9000], fmt: v => v.toLocaleString("en-US"),
+    xLabel: "step", tipLabel: "loss", endLabel: v => v.toLocaleString("en-US") });
+
+// ---- tokens per step by kernel (T1 vs T2), stacked horizontal bars
+const KINDS = [["Forward", "--s1"], ["Backward", "--s2"], ["Communication", "--s3"], ["Optimizer update", "--s4"]];
+const BARS = [["T1 · AllReduce", [2560, 5776, 1332, 560]], ["T2 · ZeRO-1 + multicast", [2560, 5776, 773, 174]]];
+(function () {
+  const host = document.getElementById("p-tok");
+  const leg = document.createElement("div"); leg.className = "legend";
+  for (const [k, c] of KINDS) { const s = document.createElement("span"); const w = document.createElement("span"); w.className = "sw"; w.style.background = `var(${c})`; s.append(w, document.createTextNode(k)); leg.appendChild(s); }
+  host.appendChild(leg);
+  const W = 920, rowH = 34, L = 176, R = 70, H = BARS.length * (rowH + 22) + 26;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Tokens per training step by kernel, T1 versus T2" }, host);
+  const max = 11000, sx = v => L + v / max * (W - L - R);
+  for (const t of [0, 2500, 5000, 7500, 10000]) {
+    el("line", { x1: sx(t), x2: sx(t), y1: 4, y2: H - 22, stroke: "var(--grid)" }, svg);
+    txt(svg, sx(t), H - 6, t.toLocaleString("en-US"), { "text-anchor": "middle" });
+  }
+  const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.appendChild(tip);
+  BARS.forEach(([name, vals], r) => {
+    const y = 8 + r * (rowH + 22);
+    txt(svg, L - 10, y + rowH / 2 + 4, name, { "text-anchor": "end", class: "lab" });
+    let acc = 0;
+    vals.forEach((v, i) => {
+      const x0 = sx(acc), x1 = sx(acc + v); acc += v;
+      const seg = el("rect", { x: x0 + (i ? 1 : 0), y, width: Math.max(1, x1 - x0 - (i ? 2 : 1)), height: rowH, rx: i === vals.length - 1 ? 4 : 0, fill: `var(${KINDS[i][1]})`, tabindex: 0, class: "hit" }, svg);
+      if (x1 - x0 > 52) txt(svg, (x0 + x1) / 2, y + rowH / 2 + 4, v.toLocaleString("en-US"), { "text-anchor": "middle", class: "lab", style: "fill: var(--surface)" });
+      const show = () => { tip.replaceChildren(); const b = document.createElement("b"); b.textContent = v.toLocaleString("en-US"); tip.append(b, document.createTextNode(` tokens · ${KINDS[i][0]} · ${name}`)); tip.hidden = false;
+        const box = svg.getBoundingClientRect(), hb = host.getBoundingClientRect(), s = box.width / W;
+        let left = box.left - hb.left + x1 * s + 8; if (left + tip.offsetWidth > hb.width - 8) left = box.left - hb.left + x0 * s - tip.offsetWidth - 8;
+        tip.style.left = Math.max(4, left) + "px"; tip.style.top = (box.top - hb.top + y * s - 4) + "px"; seg.style.opacity = 0.85; };
+      const hide = () => { tip.hidden = true; seg.style.opacity = 1; };
+      seg.addEventListener("pointerenter", show); seg.addEventListener("pointerleave", hide);
+      seg.addEventListener("focus", show); seg.addEventListener("blur", hide);
+    });
+    txt(svg, sx(acc) + 8, y + rowH / 2 + 4, acc.toLocaleString("en-US"), { class: "lab" });
+  });
+  const tbl = document.createElement("table");
+  tbl.innerHTML = "<thead><tr><th>Run</th>" + KINDS.map(k => `<th class="num">${k[0]}</th>`).join("") + "<th class='num'>Total</th></tr></thead>";
+  const tb = document.createElement("tbody");
+  for (const [name, vals] of BARS) { const tr = document.createElement("tr"); const td = document.createElement("td"); td.textContent = name; tr.appendChild(td);
+    for (const v of [...vals, vals.reduce((a, b) => a + b, 0)]) { const c = document.createElement("td"); c.className = "num"; c.textContent = v.toLocaleString("en-US"); tr.appendChild(c); } tb.appendChild(tr); }
+  tbl.appendChild(tb); const sc = document.createElement("div"); sc.className = "scroll"; sc.appendChild(tbl); host.appendChild(sc);
+})();
+
+// ---- per-step table
+(function () {
+  const t = document.createElement("table");
+  t.innerHTML = "<thead><tr><th class='num'>Step</th><th class='num'>Loss (before update)</th><th class='num'>Test acc. (after update)</th></tr></thead>";
+  const tb = document.createElement("tbody");
+  LOSS.forEach((l, i) => { const tr = document.createElement("tr");
+    for (const v of [String(i), l.toLocaleString("en-US"), (ACC[i + 1] * 100).toFixed(1) + "%"]) { const td = document.createElement("td"); td.className = "num"; td.textContent = v; tr.appendChild(td); }
+    tb.appendChild(tr); });
+  t.appendChild(tb); document.getElementById("curve-table").appendChild(t);
+})();
+</script>

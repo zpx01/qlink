@@ -1,0 +1,41 @@
+[project]
+name = "qlink"
+version = "0.1.0"
+description = "QwenGPUs that talk NCCL: a GPU compiled into Qwen3.5's weights, connected, running collectives and training"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "chipformer",
+    "numpy>=1.26",
+    "pillow>=10",
+    "textual>=1.0",
+    "torch>=2.14.1",
+    "transformers>=5.19.0",
+]
+
+[project.scripts]
+qgpu = "qgpu.tui:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+# flash-linear-attention's Gated DeltaNet kernels: verify mode about 4x faster, exact here
+fast = ["flash-linear-attention>=0.6"]
+
+[tool.uv.sources]
+# Qwenputer's transformer compiler (MIT), used as a library
+chipformer = { git = "https://github.com/divagr18/qwenputer", rev = "f07a0b2e38271454c4d455dc2b9bf78d3d399170" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["qgpu"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: runs the compiled circuit exactly (minutes)"]

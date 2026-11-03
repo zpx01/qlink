@@ -1,0 +1,573 @@
+{
+ "run": "E7: six collectives on 8 QwenGPUs (two merged models per GPU), verify mode, checked against numpy",
+ "ranks": [
+  {
+   "rank": 0,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.4,
+     "launches": 2,
+     "generated": 203,
+     "records": 91,
+     "sent_packets": 2,
+     "received_tokens": 18
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.4,
+     "launches": 2,
+     "generated": 241,
+     "records": 73,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7198
+  },
+  {
+   "rank": 1,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 168,
+     "records": 24,
+     "sent_packets": 10,
+     "received_tokens": 3
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 251,
+     "records": 83,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7220
+  },
+  {
+   "rank": 2,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 225,
+     "records": 33,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 203,
+     "records": 91,
+     "sent_packets": 2,
+     "received_tokens": 18
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7227
+  },
+  {
+   "rank": 3,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 235,
+     "records": 43,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 168,
+     "records": 24,
+     "sent_packets": 10,
+     "received_tokens": 3
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7121
+  },
+  {
+   "rank": 4,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 245,
+     "records": 53,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 201,
+     "records": 33,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7246
+  },
+  {
+   "rank": 5,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 255,
+     "records": 63,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 211,
+     "records": 43,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7266
+  },
+  {
+   "rank": 6,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 265,
+     "records": 73,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 221,
+     "records": 53,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7286
+  },
+  {
+   "rank": 7,
+   "world": 8,
+   "mode": "verify",
+   "reference": "numpy",
+   "stats": {
+    "all_reduce": {
+     "ticks": 177,
+     "seconds": 0.7,
+     "launches": 15,
+     "generated": 1480,
+     "records": 176,
+     "sent_packets": 84,
+     "received_tokens": 210
+    },
+    "reduce_scatter": {
+     "ticks": 95,
+     "seconds": 0.5,
+     "launches": 8,
+     "generated": 726,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "all_gather": {
+     "ticks": 95,
+     "seconds": 0.4,
+     "launches": 8,
+     "generated": 810,
+     "records": 94,
+     "sent_packets": 42,
+     "received_tokens": 105
+    },
+    "broadcast": {
+     "ticks": 92,
+     "seconds": 0.4,
+     "launches": 2,
+     "generated": 275,
+     "records": 83,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "reduce": {
+     "ticks": 92,
+     "seconds": 0.3,
+     "launches": 2,
+     "generated": 231,
+     "records": 63,
+     "sent_packets": 12,
+     "received_tokens": 33
+    },
+    "sendrecv": {
+     "ticks": 35,
+     "seconds": 0.3,
+     "launches": 3,
+     "generated": 250,
+     "records": 34,
+     "sent_packets": 12,
+     "received_tokens": 30
+    }
+   },
+   "same_as_nccl": {
+    "all_reduce": true,
+    "reduce_scatter": true,
+    "all_gather": true,
+    "broadcast": true,
+    "reduce": true,
+    "sendrecv": true
+   },
+   "context_tokens": 7306
+  }
+ ]
+}

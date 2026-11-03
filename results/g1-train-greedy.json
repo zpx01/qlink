@@ -1,0 +1,124 @@
+{
+ "run": "G1: T1's first 2 steps, pure greedy decoding with a per-token reference check, 4 models",
+ "config": {
+  "world": 4,
+  "batch": 8,
+  "steps": 2,
+  "shift": 6,
+  "init_seed": 0,
+  "data_seed": 1,
+  "test_seed": 2,
+  "sample_seed": 100,
+  "n_train": 256,
+  "chunk": 8,
+  "zero": false
+ },
+ "mode": "greedy",
+ "backend": "model",
+ "world": 4,
+ "init_test_acc": 0.53125,
+ "replicas_identical_every_step": true,
+ "exact_vs_numpy_steps": [
+  2,
+  2,
+  2,
+  2
+ ],
+ "loss_vs_numpy_steps": [
+  2,
+  2,
+  2,
+  2
+ ],
+ "checked_positions": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "forwards": [
+  21125,
+  21334,
+  21353,
+  21043
+ ],
+ "context_tokens": [
+  28511,
+  28732,
+  28751,
+  28438
+ ],
+ "wall_seconds": 3460.1,
+ "final_params": [
+  -187,
+  -198,
+  -19,
+  239,
+  232,
+  82,
+  238,
+  50,
+  132,
+  -241,
+  198,
+  -122,
+  -212,
+  -172,
+  1,
+  -258,
+  0,
+  -20,
+  -30,
+  -25,
+  15,
+  -22,
+  6,
+  9,
+  159,
+  95,
+  107,
+  100,
+  -162,
+  79,
+  160,
+  -130
+ ],
+ "curve": [
+  {
+   "step": 0,
+   "loss": 8733,
+   "test_acc": 0.6796875,
+   "tokens_per_rank": [
+    10228,
+    10228,
+    10228,
+    10224
+   ],
+   "seconds": 1660.16,
+   "per_kernel": {
+    "mlp_forward": 2560,
+    "mlp_backward": 5776,
+    "ar": 1332,
+    "sgd": 560
+   }
+  },
+  {
+   "step": 1,
+   "loss": 4655,
+   "test_acc": 0.7578125,
+   "tokens_per_rank": [
+    10228,
+    10228,
+    10228,
+    10228
+   ],
+   "seconds": 1539.95,
+   "per_kernel": {
+    "mlp_forward": 2560,
+    "mlp_backward": 5776,
+    "ar": 1332,
+    "sgd": 560
+   }
+  }
+ ]
+}
